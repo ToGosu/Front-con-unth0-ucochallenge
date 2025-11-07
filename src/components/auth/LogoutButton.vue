@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { useAuth } from "../../composables/useAuth"
+import { useAuthStore } from '../../stores/auth'
 
-const { logout } = useAuth()
+const authStore = useAuthStore()
 
-const handleLogout = async () => {
-  await logout()
+const handleLogout = () => {
+  authStore.clearAuth()
 }
 </script>
 

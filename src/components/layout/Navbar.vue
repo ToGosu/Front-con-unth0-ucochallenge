@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
-import { useAuth } from "../../composables/useAuth.ts";
-import LogoutButton from "../auth/LogoutButton.vue";
+import { useAuthStore } from '../../stores/auth'
+import LogoutButton from '../auth/LogoutButton.vue'
 
-const { isAuthenticated, user, isLoading } = useAuth()
+const authStore = useAuthStore()
 </script>
 
 <template>
@@ -26,21 +26,21 @@ const { isAuthenticated, user, isLoading } = useAuth()
           <li class="nav-item">
             <RouterLink class="nav-link" to="/">Inicio</RouterLink>
           </li>
-          <li class="nav-item" v-if="!isLoading && isAuthenticated">
+          <li class="nav-item" v-if="!authStore.loading && authStore.isAuth">
             <RouterLink class="nav-link" to="/dashboard">Dashboard</RouterLink>
           </li>
         </ul>
         <ul class="navbar-nav">
-          <li class="nav-item" v-if="isLoading">
+          <li class="nav-item" v-if="authStore.loading">
             <span class="nav-link text-white-50">Cargando...</span>
           </li>
-          <li class="nav-item" v-else-if="isAuthenticated">
-            <span class="nav-link">Hola, {{ user?.name || user?.email }}</span>
+          <li class="nav-item" v-else-if="authStore.isAuth">
+            <span class="nav-link">Hola, {{ authStore.currentUser?.name || authStore.currentUser?.nickname || authStore.currentUser?.email }}</span>
           </li>
-          <li class="nav-item" v-if="!isLoading && !isAuthenticated">
+          <li class="nav-item" v-if="!authStore.loading && !authStore.isAuth">
             <RouterLink class="nav-link btn btn-primary text-white" to="/login">Iniciar Sesión</RouterLink>
           </li>
-          <li class="nav-item" v-else-if="!isLoading && isAuthenticated">
+          <li class="nav-item" v-else-if="!authStore.loading && authStore.isAuth">
             <LogoutButton />
           </li>
         </ul>

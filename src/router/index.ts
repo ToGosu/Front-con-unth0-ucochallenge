@@ -2,7 +2,7 @@
 
 import { createRouter, createWebHistory } from 'vue-router'
 import { watch } from 'vue'
-import type { RouteRecordRaw } from 'vue-router'
+import type { RouteRecordRaw, RouteMeta } from 'vue-router'
 
 import HomeView from '../views/HomeView.vue'
 import LoginView from '../views/LoginView.vue'
@@ -14,6 +14,14 @@ import Callback from '../views/Callback.vue'
 
 import { useAuth0 } from '@auth0/auth0-vue'
 import { useAuthStore } from '../stores/auth'
+
+// Extender el tipo RouteMeta para incluir nuestras propiedades personalizadas
+declare module 'vue-router' {
+  interface RouteMeta {
+    requiresAuth?: boolean
+    roles?: string[]
+  }
+}
 
 const routes: RouteRecordRaw[] = [
   { path: '/', name: 'home', component: HomeView },
@@ -33,6 +41,9 @@ const router = createRouter({
   }
 })
 
+// Helper para detectar si estamos en desarrollo
+const isDevelopment = import.meta.env.DEV
+
 // 🔐 Middleware de autenticación
 router.beforeEach(async (to, _from, next) => {
   const { isAuthenticated, isLoading, loginWithRedirect } = useAuth0()
@@ -51,7 +62,7 @@ router.beforeEach(async (to, _from, next) => {
   }
 
   // Si requiere autenticación
-  if ((to.meta as any)?.requiresAuth) {
+  if (to.meta.requiresAuth) {
     if (!isAuthenticated.value) {
       await loginWithRedirect({ appState: { target: to.fullPath } })
       return next(false)
@@ -62,17 +73,21 @@ router.beforeEach(async (to, _from, next) => {
       const token = await authStore.fetchAndSetToken().catch(() => null)
 
       if (!token) {
-        console.warn('Token expirado o sesión inválida. Redirigiendo...')
+        if (isDevelopment) {
+          console.warn('Token expirado o sesión inválida. Redirigiendo...')
+        }
         authStore.clearAuth()
         return next({ name: 'home' })
       }
     }
 
     // Validar roles si la ruta los requiere
-    const requiredRoles: string[] = (to.meta as any).roles || []
+    const requiredRoles = to.meta.roles || []
     if (requiredRoles.length > 0) {
       const hasRole = requiredRoles.some((r) => authStore.hasRole(r))
-      if (!hasRole) return next({ name: 'home' })
+      if (!hasRole) {
+        return next({ name: 'home' })
+      }
     }
   }
 

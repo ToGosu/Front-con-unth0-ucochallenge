@@ -61,7 +61,9 @@ const handleLogin = async () => {
       appState: { target: '/dashboard' }
     })
   } catch (err: any) {
-    console.error('❌ Error al iniciar sesión:', err)
+    if (import.meta.env.DEV) {
+      console.error('❌ Error al iniciar sesión:', err)
+    }
     error.value = auth0Error.value?.message || 'Error al iniciar sesión'
   }
 }

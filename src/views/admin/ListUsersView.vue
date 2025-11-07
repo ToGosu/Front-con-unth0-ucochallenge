@@ -7,10 +7,9 @@
         {{ loading ? 'Cargando...' : 'Recargar Lista' }}
       </button>
 
-      <div v-if="error" class="alert alert-danger">{{ error }}</div>
-      <div v-if="loading && users.length === 0" class="text-center text-info">Cargando datos...</div>
+      <LoadingSpinner v-if="loading && users.length === 0" message="Cargando usuarios..." />
 
-      <div v-if="users.length > 0">
+      <div v-else-if="users.length > 0">
         <div class="table-responsive">
           <table class="table table-striped table-hover">
             <thead>
@@ -43,43 +42,54 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import api from '../../services/api';
+import { ref, onMounted } from 'vue'
+import api from '../../services/api'
+import { useNotificationsStore } from '../../stores/notifications'
+import LoadingSpinner from '../../components/ui/LoadingSpinner.vue'
 
 interface UserRecord {
-  idNumber: string;
-  firstName: string;
-  firstSurname: string;
-  email: string;
-  homeCity: string;
+  idNumber: string
+  firstName: string
+  firstSurname: string
+  email: string
+  homeCity: string
   // ... otros campos
 }
 
-const users = ref<UserRecord[]>([]);
-const loading = ref(false);
-const error = ref<string | null>(null);
+const notifications = useNotificationsStore()
+const users = ref<UserRecord[]>([])
+const loading = ref(false)
 
 const fetchUsers = async () => {
-  loading.value = true;
-  error.value = null;
+  loading.value = true
 
   try {
-    // ✅ Endpoint correcto (GET /api/v1/users)
-    const response = await api.get('/api/v1/users');
+    const response = await api.get('/api/v1/users')
+    users.value = response.data || []
+    
+    if (users.value.length === 0) {
+      notifications.info('No hay usuarios registrados')
+    } else {
+      notifications.success(`${users.value.length} usuario(s) cargado(s)`)
+    }
 
-    // Asumiendo que la respuesta es un array de objetos UserRecord
-    users.value = response.data || [];
-
+    if (import.meta.env.DEV) {
+      console.log('Usuarios obtenidos:', response.data)
+    }
   } catch (err: any) {
-    error.value =
-      err.response?.data?.message ||
-      'Fallo al cargar los usuarios. Asegúrate de tener el rol "admin" y que el Gateway esté activo.';
-    users.value = [];
+    const errorMessage = err.response?.data?.message ||
+                        'Error al cargar los usuarios. Asegúrate de tener el rol "admin" y que el Gateway esté activo.'
+    notifications.error(errorMessage)
+    users.value = []
+    
+    if (import.meta.env.DEV) {
+      console.error('Error al cargar usuarios:', err)
+    }
   } finally {
-    loading.value = false;
+    loading.value = false
   }
-};
+}
 
 // Cargar usuarios al montar la vista
-onMounted(fetchUsers);
+onMounted(fetchUsers)
 </script>
