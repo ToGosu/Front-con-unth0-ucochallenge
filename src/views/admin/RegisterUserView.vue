@@ -202,10 +202,11 @@
                   id="mobileNumber"
                   v-model="fieldsState.mobileNumber.value"
                   @blur="validateField('mobileNumber')"
-                  @input="handleInput('mobileNumber')"
-                  @keypress="onlyNumbers"
-                  maxlength="15"
-                  placeholder="Solo números"
+                  @input="handlePhoneInput"
+                  @keydown="handlePhoneKeydown"
+                  @focus="handlePhoneFocus"
+                  maxlength="13"
+                  placeholder="+57 3001234567"
                 />
                 <div v-if="fieldsState.mobileNumber.error" class="invalid-feedback">
                   {{ fieldsState.mobileNumber.error }}
@@ -321,7 +322,7 @@ const { fieldsState, validateField, validateAll, reset } = useFormValidation({
     error: null,
   } as FieldValidation,
   mobileNumber: {
-    value: '',
+    value: '+57',
     rules: [
       validationRules.required('El teléfono móvil es requerido'),
       validationRules.phone('Por favor ingresa un teléfono válido'),
@@ -379,6 +380,111 @@ const handleInputNumeric = (fieldName: 'idNumber' | 'mobileNumber') => {
   }
 }
 
+// Maneja la entrada del teléfono móvil, asegurando que siempre tenga +57
+const handlePhoneInput = (event: Event) => {
+  const input = event.target as HTMLInputElement
+  let value = input.value
+  
+  // Si el campo está vacío o no empieza con +57, agregar +57
+  if (!value.startsWith('+57')) {
+    // Si el usuario escribió números, agregar +57 al inicio
+    const numbersOnly = value.replace(/\D/g, '')
+    if (numbersOnly) {
+      value = '+57' + numbersOnly
+    } else {
+      value = '+57'
+    }
+  } else {
+    // Si ya tiene +57, asegurar que solo tenga números después del +57
+    const prefix = '+57'
+    const numbersOnly = value.replace(/\D/g, '').substring(2) // Remover el 57 del inicio también
+    value = prefix + numbersOnly
+  }
+  
+  // Limitar a 13 caracteres (incluyendo +57 y máximo 10 dígitos)
+  if (value.length > 13) {
+    value = value.substring(0, 13)
+  }
+  
+  fieldsState.value.mobileNumber.value = value
+  
+  if (fieldsState.value.mobileNumber.touched) {
+    validateField('mobileNumber')
+  }
+}
+
+// Maneja el foco en el campo de teléfono para asegurar que tenga +57
+const handlePhoneFocus = (event: Event) => {
+  const input = event.target as HTMLInputElement
+  let value = input.value
+  
+  // Si el campo no tiene +57, agregarlo
+  if (!value.startsWith('+57')) {
+    const numbersOnly = value.replace(/\D/g, '')
+    if (numbersOnly) {
+      value = '+57' + numbersOnly
+    } else {
+      value = '+57'
+    }
+    fieldsState.value.mobileNumber.value = value
+    // Mover el cursor al final
+    setTimeout(() => {
+      input.setSelectionRange(value.length, value.length)
+    }, 0)
+  }
+}
+
+// Maneja las teclas especiales en el campo de teléfono
+const handlePhoneKeydown = (event: KeyboardEvent) => {
+  const input = event.target as HTMLInputElement
+  const cursorPosition = input.selectionStart || 0
+  const selectionEnd = input.selectionEnd || 0
+  
+  // Permitir teclas de navegación y control siempre
+  if (['Tab', 'ArrowLeft', 'ArrowRight', 'Home', 'End', 'Enter'].includes(event.key)) {
+    return
+  }
+  
+  // Permitir Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X, etc.
+  if (event.ctrlKey || event.metaKey) {
+    return
+  }
+  
+  // Prevenir borrar el prefijo +57
+  if (event.key === 'Backspace') {
+    // Si el cursor está antes o en el prefijo +57, prevenir el borrado
+    if (cursorPosition <= 3) {
+      event.preventDefault()
+      return
+    }
+    // Si hay selección que incluye el prefijo, prevenir
+    if (selectionEnd < cursorPosition && selectionEnd <= 3) {
+      event.preventDefault()
+      return
+    }
+  }
+  
+  if (event.key === 'Delete') {
+    // Si el cursor está antes del prefijo +57, prevenir el borrado
+    if (cursorPosition < 3) {
+      event.preventDefault()
+      return
+    }
+  }
+  
+  // Solo permitir números después del +57
+  if (cursorPosition < 3) {
+    // Si el cursor está en el prefijo, prevenir cualquier entrada
+    event.preventDefault()
+  } else {
+    // Solo permitir números
+    const char = event.key
+    if (!/[0-9]/.test(char)) {
+      event.preventDefault()
+    }
+  }
+}
+
 // Solo permite letras en el input
 const handleInputLetters = (fieldName: 'firstName' | 'secondName' | 'firstSurname' | 'secondSurname') => {
   // Remover caracteres que no sean letras, espacios, guiones o apóstrofes
@@ -417,24 +523,41 @@ const submitForm = async () => {
 
   try {
     // Preparar datos del formulario
+    // Verificar que fieldsState esté disponible
+    if (!fieldsState.value) {
+      throw new Error('El estado del formulario no está disponible')
+    }
+    
+    const fields = fieldsState.value
+    
+    // Validar que los campos requeridos existan
+    if (!fields.idType || !fields.idNumber || !fields.firstName || 
+        !fields.firstSurname || !fields.homeCity || !fields.email || !fields.mobileNumber) {
+      console.error('Campos faltantes en fieldsState:', fields)
+      throw new Error('Error en la estructura del formulario. Por favor recarga la página.')
+    }
+    
     const userData = {
-      idType: fieldsState.idType.value,
-      idNumber: fieldsState.idNumber.value.trim(),
-      firstName: fieldsState.firstName.value.trim(),
-      secondName: fieldsState.secondName.value.trim() || undefined,
-      firstSurname: fieldsState.firstSurname.value.trim(),
-      secondSurname: fieldsState.secondSurname.value.trim() || undefined,
-      homeCity: fieldsState.homeCity.value.trim(),
-      email: fieldsState.email.value.trim().toLowerCase(),
-      mobileNumber: fieldsState.mobileNumber.value.trim(),
+      idType: fields.idType.value,
+      idNumber: fields.idNumber.value.trim(),
+      firstName: fields.firstName.value.trim(),
+      secondName: fields.secondName?.value?.trim() || undefined,
+      firstSurname: fields.firstSurname.value.trim(),
+      secondSurname: fields.secondSurname?.value?.trim() || undefined,
+      homeCity: fields.homeCity.value,
+      email: fields.email.value.trim().toLowerCase(),
+      mobileNumber: fields.mobileNumber.value.trim(),
     }
 
-    const response = await api.post('/api/v1/users', userData)
+    const response = await api.post('/v1/users', userData)
     
     notifications.success('Usuario registrado exitosamente')
     
     // Limpiar formulario después de registro exitoso
     reset()
+    
+    // Restaurar el prefijo +57 en el campo de teléfono después del reset
+    fieldsState.value.mobileNumber.value = '+57'
     
     // Solo loggear en desarrollo
     if (import.meta.env.DEV) {

@@ -105,9 +105,15 @@ export const validationRules = {
   phone: (message = 'Teléfono inválido'): ValidationRule => ({
     validator: (value) => {
       if (!value.trim()) return true
-      // Acepta números con o sin espacios, guiones, paréntesis
-      const phoneRegex = /^[\d\s\-\(\)]+$/
-      return phoneRegex.test(value) && value.replace(/\D/g, '').length >= 7
+      // Acepta formato internacional con +57 (Colombia)
+      // Debe empezar con +57 y tener al menos 10 dígitos en total (57 + 8 dígitos mínimo)
+      const phoneRegex = /^\+57\d{8,10}$/
+      if (phoneRegex.test(value)) {
+        return true
+      }
+      // También acepta formato antiguo sin +57 para compatibilidad
+      const oldFormatRegex = /^[\d\s\-\(\)]+$/
+      return oldFormatRegex.test(value) && value.replace(/\D/g, '').length >= 7
     },
     message,
   }),

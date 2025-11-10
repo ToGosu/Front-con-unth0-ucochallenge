@@ -15,7 +15,7 @@ const callProtectedApi = async () => {
   apiResponse.value = 'Llamando a la API protegida...'
   
   try {
-    const response = await api.get('/parameters/api/v1/parameters')
+    const response = await api.get('/v1/parameters')
     apiResponse.value = JSON.stringify(response.data, null, 2)
     notifications.success('Datos obtenidos exitosamente')
     

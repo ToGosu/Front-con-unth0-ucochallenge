@@ -17,10 +17,8 @@ export interface IdType {
 /**
  * Obtiene la lista de ciudades disponibles
  * 
- * RUTAS DEL BACKEND (ajustar según corresponda):
- * - GET http://localhost:8090/api/v1/cities
- * - GET http://localhost:8090/catalog/cities
- * - GET http://localhost:8090/api/v1/catalog/cities
+ * RUTAS DEL BACKEND:
+ * - GET https://localhost:8443/uco-challenge/api/v1/cities
  * 
  * Formato esperado de respuesta:
  * [
@@ -30,11 +28,7 @@ export interface IdType {
  */
 export async function getCities(): Promise<City[]> {
   try {
-    // Cambiar esta ruta según tu backend
-    // Ejemplos de rutas comunes:
-    // '/api/v1/cities'
-    // '/catalog/cities'
-    // '/api/v1/catalog/cities'
+    // La base URL ya incluye /uco-challenge, así que solo agregamos /api/v1/cities
     const response = await api.get<City[]>('/api/v1/cities')
     return response.data || []
   } catch (error) {
@@ -50,10 +44,8 @@ export async function getCities(): Promise<City[]> {
 /**
  * Obtiene la lista de tipos de identificación disponibles
  * 
- * RUTAS DEL BACKEND (ajustar según corresponda):
- * - GET http://localhost:8090/api/v1/id-types
- * - GET http://localhost:8090/catalog/id-types
- * - GET http://localhost:8090/api/v1/catalog/id-types
+ * RUTAS DEL BACKEND:
+ * - GET https://localhost:8443/uco-challenge/api/v1/idtypes
  * 
  * Formato esperado de respuesta:
  * [
@@ -65,18 +57,14 @@ export async function getCities(): Promise<City[]> {
  */
 export async function getIdTypes(): Promise<IdType[]> {
   try {
-    // Cambiar esta ruta según tu backend
-    // Ejemplos de rutas comunes:
-    // '/api/v1/id-types'
-    // '/catalog/id-types'
-    // '/api/v1/catalog/id-types'
-    const response = await api.get<IdType[]>('/api/v1/id-types')
+    // La base URL ya incluye /uco-challenge, así que solo agregamos /api/v1/idtypes
+    const response = await api.get<IdType[]>('/api/v1/idtypes')
     return response.data || []
   } catch (error) {
     // Si el endpoint no existe, retornar valores por defecto comunes
     if (import.meta.env.DEV) {
       console.warn('No se pudo obtener los tipos de ID desde el backend. Usando lista por defecto.', error)
-      console.warn('Ruta intentada: GET /api/v1/id-types')
+      console.warn('Ruta intentada: GET /api/v1/idtypes')
     }
     // Valores por defecto comunes en muchos países
     return [

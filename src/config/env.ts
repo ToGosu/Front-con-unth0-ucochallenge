@@ -43,7 +43,8 @@ export function getEnvConfig(): EnvConfig {
   const auth0Audience = requireEnv('VITE_AUTH0_AUDIENCE')
   
   // Variables opcionales con valores por defecto
-  const apiBaseUrl = getEnv('VITE_API_BASE_URL', 'http://localhost:8090')
+  // Nueva URL HTTPS a través del Nginx WAF
+  const apiBaseUrl = getEnv('VITE_API_URL', 'https://localhost:8443/uco-challenge')
   
   return {
     auth0Domain,
