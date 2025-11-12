@@ -2,7 +2,24 @@
   <div class="container mt-5">
     <div class="row justify-content-center">
       <div class="col-md-10">
-        <div class="card shadow-sm p-4">
+        <!-- Componente de confirmación de número celular -->
+        <div v-if="showConfirmForm" class="mb-4">
+          <ConfirmMobileForm 
+            @confirmed="handleMobileConfirmed"
+            @error="handleConfirmError"
+          />
+          <div class="text-center mt-3">
+            <button 
+              @click="showConfirmForm = false; registeredMobileNumber = null" 
+              class="btn btn-link"
+            >
+              Volver al formulario de registro
+            </button>
+          </div>
+        </div>
+
+        <!-- Formulario de registro -->
+        <div v-else class="card shadow-sm p-4">
           <h2 class="mb-4 text-center">Registro de Nuevo Usuario</h2>
           
           <LoadingSpinner v-if="loading" message="Registrando usuario..." />
@@ -213,9 +230,9 @@
               Registrar Usuario
             </button>
           </form>
-        </div>
-        <div class="mt-3">
-          <router-link :to="{ name: 'home' }" class="btn btn-link">Volver al Home</router-link>
+          <div class="mt-3">
+            <router-link :to="{ name: 'home' }" class="btn btn-link">Volver al Home</router-link>
+          </div>
         </div>
       </div>
     </div>
@@ -228,6 +245,7 @@ import api from '../../services/api'
 import { useFormValidation, validationRules, type FieldValidation } from '../../composables/useFormValidation'
 import { useNotificationsStore } from '../../stores/notifications'
 import LoadingSpinner from '../../components/ui/LoadingSpinner.vue'
+import ConfirmMobileForm from '../../components/auth/ConfirmMobileForm.vue'
 import { getCities, getIdTypes, type City, type IdType } from '../../services/catalog.service'
 
 const notifications = useNotificationsStore()
@@ -236,6 +254,8 @@ const loadingCities = ref(false)
 const loadingIdTypes = ref(false)
 const cities = ref<City[]>([])
 const idTypes = ref<IdType[]>([])
+const showConfirmForm = ref(false)
+const registeredMobileNumber = ref<string | null>(null)
 
 const { fieldsState, validateField, validateAll, reset } = useFormValidation({
   idType: {
@@ -487,6 +507,7 @@ const submitForm = async () => {
   }
 
   loading.value = true
+  console.log('🚀 Iniciando registro de usuario...')
 
   try {
     if (!fieldsState.value) {
@@ -515,11 +536,13 @@ const submitForm = async () => {
 
     const response = await api.post('/v1/users', userData)
     
-    notifications.success('Usuario registrado exitosamente')
+    // Guardar el número de teléfono registrado
+    registeredMobileNumber.value = userData.mobileNumber
     
-    reset()
+    notifications.success('Usuario registrado exitosamente. Se ha enviado un código de confirmación por SMS.')
     
-    fieldsState.value.mobileNumber.value = '+57'
+    // Mostrar el formulario de confirmación
+    showConfirmForm.value = true
     
     if (import.meta.env.DEV) {
       console.log('Registro exitoso:', response.data)
@@ -531,6 +554,22 @@ const submitForm = async () => {
     notifications.error(errorMessage)
   } finally {
     loading.value = false
+  }
+}
+
+const handleMobileConfirmed = () => {
+  // Cuando se confirma el número, volver al formulario de registro
+  showConfirmForm.value = false
+  registeredMobileNumber.value = null
+  reset()
+  fieldsState.value.mobileNumber.value = '+57'
+  notifications.success('El número de celular ha sido confirmado exitosamente. Puedes registrar otro usuario si lo deseas.')
+}
+
+const handleConfirmError = (errorMessage: string) => {
+  // Los errores ya se manejan en el componente, solo logueamos si es necesario
+  if (import.meta.env.DEV) {
+    console.error('Error al confirmar número:', errorMessage)
   }
 }
 </script>
