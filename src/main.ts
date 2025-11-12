@@ -1,5 +1,3 @@
-// src/main.ts
-
 import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
@@ -11,12 +9,9 @@ import 'bootstrap'
 
 const app = createApp(App)
 
-// Pinia
 const pinia = createPinia()
 app.use(pinia)
 
-// Auth0 configuration: usa variables de entorno validadas
-// Las variables se validan al importar envConfig
 app.use(router)
 
 app.use(

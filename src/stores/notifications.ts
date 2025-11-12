@@ -28,7 +28,6 @@ export const useNotificationsStore = defineStore('notifications', () => {
 
     notifications.value.push(notification)
 
-    // Auto-remover después de la duración especificada
     if (duration > 0) {
       setTimeout(() => {
         removeNotification(id)

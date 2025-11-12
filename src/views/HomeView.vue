@@ -25,7 +25,7 @@
             <h3 class="mb-3">Hola, {{ authStore.currentUser?.nickname || 'Usuario' }}</h3>
 
             <div v-if="authStore.hasRole('admin')" class="alert alert-success mt-4">
-              <p class="lead">🎉 ¡Tienes el rol **ADMINISTRADOR**! Puedes gestionar usuarios.</p>
+              <p class="lead">¡Tienes el rol **ADMINISTRADOR**! Puedes gestionar usuarios.</p>
               <hr />
               <div class="d-grid gap-2">
                 <router-link :to="{ name: 'admin.register' }" class="btn btn-danger btn-lg">
@@ -40,7 +40,7 @@
             <div v-else-if="authStore.hasRole('client')" class="alert alert-info mt-4">
               <p class="lead">
                 ¡Tienes el rol **CLIENT**! <br />
-                ❌ No tienes permisos para acceder a las secciones de administración.
+                No tienes permisos para acceder a las secciones de administración.
               </p>
               <p class="mt-3">
                 <button @click="authStore.clearAuth()" class="btn btn-sm btn-outline-secondary">
@@ -63,12 +63,11 @@
 <script setup lang="ts">
 import { onMounted, watch } from 'vue';
 import { useAuthStore } from '../stores/auth';
-import { useAuth0 } from '@auth0/auth0-vue'; // Para manejar el isLoading
+import { useAuth0 } from '@auth0/auth0-vue';
 
 const authStore = useAuthStore();
 const { isLoading } = useAuth0();
 
-// 💡 CLAVE: Observar la carga para obtener el token tan pronto como el SDK esté listo
 watch(isLoading, async (newVal) => {
   if (newVal === false && authStore.isAuth && !authStore.accessToken) {
     await authStore.fetchAndSetToken();
@@ -76,7 +75,6 @@ watch(isLoading, async (newVal) => {
 }, { immediate: true });
 
 onMounted(() => {
-  // Si ya estamos autenticados y no tenemos token (ej: después de una recarga), intentar obtenerlo
   if (authStore.isAuth && !authStore.accessToken) {
     authStore.fetchAndSetToken();
   }
@@ -84,7 +82,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* Estilos Bootstrap mejorados */
 .card {
   border-radius: 10px;
 }

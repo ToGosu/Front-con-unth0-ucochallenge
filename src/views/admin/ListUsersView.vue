@@ -54,7 +54,6 @@ interface UserRecord {
   firstSurname: string
   email: string
   homeCity: string
-  // ... otros campos
 }
 
 const notifications = useNotificationsStore()
@@ -63,7 +62,6 @@ const loading = ref(false)
 const cities = ref<City[]>([])
 const loadingCities = ref(false)
 
-// Crear un mapa de UUID a nombre de ciudad para búsqueda rápida
 const cityMap = computed(() => {
   const map = new Map<string, string>()
   cities.value.forEach(city => {
@@ -72,10 +70,9 @@ const cityMap = computed(() => {
   return map
 })
 
-// Función para obtener el nombre de la ciudad a partir del UUID
 const getCityName = (cityId: string): string => {
   if (!cityId) return 'N/A'
-  return cityMap.value.get(cityId) || cityId // Si no se encuentra, mostrar el UUID como fallback
+  return cityMap.value.get(cityId) || cityId
 }
 
 const fetchUsers = async () => {
@@ -108,7 +105,6 @@ const fetchUsers = async () => {
   }
 }
 
-// Función para cargar las ciudades
 const loadCities = async () => {
   loadingCities.value = true
   try {
@@ -124,13 +120,11 @@ const loadCities = async () => {
   }
 }
 
-// Función para recargar tanto ciudades como usuarios
 const reloadData = async () => {
   await loadCities()
   await fetchUsers()
 }
 
-// Cargar ciudades y usuarios al montar la vista
 onMounted(async () => {
   await reloadData()
 })

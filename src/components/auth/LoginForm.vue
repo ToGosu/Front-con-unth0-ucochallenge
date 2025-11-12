@@ -3,12 +3,10 @@
     <h3 class="card-title text-center mb-4">Iniciar Sesión</h3>
     <p class="text-center">Por favor, inicia sesión para acceder a tu cuenta.</p>
 
-    <!-- Indicador de carga -->
     <div v-if="authStore.loading" class="text-center text-info mb-3">
       Cargando estado de autenticación...
     </div>
 
-    <!-- Botón de inicio de sesión -->
     <button
       v-if="!authStore.isAuth"
       @click="handleLogin"
@@ -17,7 +15,6 @@
       Iniciar Sesión con Auth0
     </button>
 
-    <!-- Botón de cierre de sesión -->
     <button
       v-if="authStore.isAuth"
       @click="handleLogout"
@@ -26,9 +23,8 @@
       Cerrar Sesión
     </button>
 
-    <!-- Estado de autenticación -->
     <div v-if="authStore.isAuth" class="mt-3 alert alert-success">
-      <p>✅ ¡Autenticado!</p>
+      <p>¡Autenticado!</p>
       <strong>Roles Asignados:</strong>
       <span
         v-for="role in authStore.userRoles"
@@ -39,7 +35,6 @@
       </span>
     </div>
 
-    <!-- Error -->
     <p v-if="error" class="text-danger text-center mt-2">{{ error }}</p>
   </div>
 </template>
@@ -56,13 +51,12 @@ const error = ref<string | null>(null)
 const handleLogin = async () => {
   error.value = null
   try {
-    // 🔁 Redirige a Auth0 y guarda destino (por ejemplo, dashboard)
     await loginWithRedirect({
       appState: { target: '/dashboard' }
     })
   } catch (err: any) {
     if (import.meta.env.DEV) {
-      console.error('❌ Error al iniciar sesión:', err)
+      console.error('Error al iniciar sesión:', err)
     }
     error.value = auth0Error.value?.message || 'Error al iniciar sesión'
   }

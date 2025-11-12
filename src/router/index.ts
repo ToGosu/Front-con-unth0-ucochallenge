@@ -1,8 +1,6 @@
-// src/router/index.ts
-
 import { createRouter, createWebHistory } from 'vue-router'
 import { watch } from 'vue'
-import type { RouteRecordRaw, RouteMeta } from 'vue-router'
+import type { RouteRecordRaw } from 'vue-router'
 
 import HomeView from '../views/HomeView.vue'
 import LoginView from '../views/LoginView.vue'
@@ -15,7 +13,6 @@ import Callback from '../views/Callback.vue'
 import { useAuth0 } from '@auth0/auth0-vue'
 import { useAuthStore } from '../stores/auth'
 
-// Extender el tipo RouteMeta para incluir nuestras propiedades personalizadas
 declare module 'vue-router' {
   interface RouteMeta {
     requiresAuth?: boolean
@@ -41,15 +38,12 @@ const router = createRouter({
   }
 })
 
-// Helper para detectar si estamos en desarrollo
 const isDevelopment = import.meta.env.DEV
 
-// 🔐 Middleware de autenticación
 router.beforeEach(async (to, _from, next) => {
   const { isAuthenticated, isLoading, loginWithRedirect } = useAuth0()
   const authStore = useAuthStore()
 
-  // Espera a que Auth0 se inicialice
   if (isLoading.value) {
     await new Promise<void>((resolve) => {
       const stop = watch(isLoading, (val) => {
@@ -61,14 +55,12 @@ router.beforeEach(async (to, _from, next) => {
     })
   }
 
-  // Si requiere autenticación
   if (to.meta.requiresAuth) {
     if (!isAuthenticated.value) {
       await loginWithRedirect({ appState: { target: to.fullPath } })
       return next(false)
     }
 
-    // Intentar obtener el token si no existe
     if (!authStore.accessToken) {
       const token = await authStore.fetchAndSetToken().catch(() => null)
 
@@ -81,7 +73,6 @@ router.beforeEach(async (to, _from, next) => {
       }
     }
 
-    // Validar roles si la ruta los requiere
     const requiredRoles = to.meta.roles || []
     if (requiredRoles.length > 0) {
       const hasRole = requiredRoles.some((r) => authStore.hasRole(r))

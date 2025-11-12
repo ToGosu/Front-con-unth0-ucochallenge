@@ -8,7 +8,6 @@
           <LoadingSpinner v-if="loading" message="Registrando usuario..." />
           
           <form v-else @submit.prevent="submitForm">
-            <!-- Tipo de ID y Número de Identificación -->
             <div class="row mb-3">
               <div class="col-md-4">
                 <label for="idType" class="form-label">
@@ -57,7 +56,6 @@
               </div>
             </div>
             
-            <!-- Nombres -->
             <div class="row mb-3">
               <div class="col-md-6">
                 <label for="firstName" class="form-label">
@@ -99,7 +97,6 @@
               </div>
             </div>
             
-            <!-- Apellidos -->
             <div class="row mb-3">
               <div class="col-md-6">
                 <label for="firstSurname" class="form-label">
@@ -141,7 +138,6 @@
               </div>
             </div>
             
-            <!-- Ciudad y Email -->
             <div class="row mb-3">
               <div class="col-md-6">
                 <label for="homeCity" class="form-label">
@@ -189,7 +185,6 @@
               </div>
             </div>
             
-            <!-- Teléfono -->
             <div class="row mb-3">
               <div class="col-md-6">
                 <label for="mobileNumber" class="form-label">
@@ -242,7 +237,6 @@ const loadingIdTypes = ref(false)
 const cities = ref<City[]>([])
 const idTypes = ref<IdType[]>([])
 
-// Configuración de campos con validación
 const { fieldsState, validateField, validateAll, reset } = useFormValidation({
   idType: {
     value: '',
@@ -332,7 +326,6 @@ const { fieldsState, validateField, validateAll, reset } = useFormValidation({
   } as FieldValidation,
 })
 
-// Cargar catálogos al montar el componente
 onMounted(async () => {
   loadingCities.value = true
   loadingIdTypes.value = true
@@ -360,7 +353,6 @@ onMounted(async () => {
   }
 })
 
-// Funciones helper para validación en tiempo real
 const handleInput = (
   fieldName: 'idType' | 'idNumber' | 'firstName' | 'secondName' | 'firstSurname' | 'secondSurname' | 'homeCity' | 'email' | 'mobileNumber'
 ) => {
@@ -369,9 +361,7 @@ const handleInput = (
   }
 }
 
-// Solo permite números en el input
 const handleInputNumeric = (fieldName: 'idNumber' | 'mobileNumber') => {
-  // Remover caracteres no numéricos
   const numericValue = fieldsState.value[fieldName].value.replace(/\D/g, '')
   fieldsState.value[fieldName].value = numericValue
   
@@ -380,14 +370,11 @@ const handleInputNumeric = (fieldName: 'idNumber' | 'mobileNumber') => {
   }
 }
 
-// Maneja la entrada del teléfono móvil, asegurando que siempre tenga +57
 const handlePhoneInput = (event: Event) => {
   const input = event.target as HTMLInputElement
   let value = input.value
   
-  // Si el campo está vacío o no empieza con +57, agregar +57
   if (!value.startsWith('+57')) {
-    // Si el usuario escribió números, agregar +57 al inicio
     const numbersOnly = value.replace(/\D/g, '')
     if (numbersOnly) {
       value = '+57' + numbersOnly
@@ -395,13 +382,11 @@ const handlePhoneInput = (event: Event) => {
       value = '+57'
     }
   } else {
-    // Si ya tiene +57, asegurar que solo tenga números después del +57
     const prefix = '+57'
-    const numbersOnly = value.replace(/\D/g, '').substring(2) // Remover el 57 del inicio también
+    const numbersOnly = value.replace(/\D/g, '').substring(2)
     value = prefix + numbersOnly
   }
   
-  // Limitar a 13 caracteres (incluyendo +57 y máximo 10 dígitos)
   if (value.length > 13) {
     value = value.substring(0, 13)
   }
@@ -413,12 +398,10 @@ const handlePhoneInput = (event: Event) => {
   }
 }
 
-// Maneja el foco en el campo de teléfono para asegurar que tenga +57
 const handlePhoneFocus = (event: Event) => {
   const input = event.target as HTMLInputElement
   let value = input.value
   
-  // Si el campo no tiene +57, agregarlo
   if (!value.startsWith('+57')) {
     const numbersOnly = value.replace(/\D/g, '')
     if (numbersOnly) {
@@ -427,37 +410,30 @@ const handlePhoneFocus = (event: Event) => {
       value = '+57'
     }
     fieldsState.value.mobileNumber.value = value
-    // Mover el cursor al final
     setTimeout(() => {
       input.setSelectionRange(value.length, value.length)
     }, 0)
   }
 }
 
-// Maneja las teclas especiales en el campo de teléfono
 const handlePhoneKeydown = (event: KeyboardEvent) => {
   const input = event.target as HTMLInputElement
   const cursorPosition = input.selectionStart || 0
   const selectionEnd = input.selectionEnd || 0
   
-  // Permitir teclas de navegación y control siempre
   if (['Tab', 'ArrowLeft', 'ArrowRight', 'Home', 'End', 'Enter'].includes(event.key)) {
     return
   }
   
-  // Permitir Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X, etc.
   if (event.ctrlKey || event.metaKey) {
     return
   }
   
-  // Prevenir borrar el prefijo +57
   if (event.key === 'Backspace') {
-    // Si el cursor está antes o en el prefijo +57, prevenir el borrado
     if (cursorPosition <= 3) {
       event.preventDefault()
       return
     }
-    // Si hay selección que incluye el prefijo, prevenir
     if (selectionEnd < cursorPosition && selectionEnd <= 3) {
       event.preventDefault()
       return
@@ -465,19 +441,15 @@ const handlePhoneKeydown = (event: KeyboardEvent) => {
   }
   
   if (event.key === 'Delete') {
-    // Si el cursor está antes del prefijo +57, prevenir el borrado
     if (cursorPosition < 3) {
       event.preventDefault()
       return
     }
   }
   
-  // Solo permitir números después del +57
   if (cursorPosition < 3) {
-    // Si el cursor está en el prefijo, prevenir cualquier entrada
     event.preventDefault()
   } else {
-    // Solo permitir números
     const char = event.key
     if (!/[0-9]/.test(char)) {
       event.preventDefault()
@@ -485,9 +457,7 @@ const handlePhoneKeydown = (event: KeyboardEvent) => {
   }
 }
 
-// Solo permite letras en el input
 const handleInputLetters = (fieldName: 'firstName' | 'secondName' | 'firstSurname' | 'secondSurname') => {
-  // Remover caracteres que no sean letras, espacios, guiones o apóstrofes
   const lettersValue = fieldsState.value[fieldName].value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s\-']/g, '')
   fieldsState.value[fieldName].value = lettersValue
   
@@ -496,7 +466,6 @@ const handleInputLetters = (fieldName: 'firstName' | 'secondName' | 'firstSurnam
   }
 }
 
-// Prevenir entrada de caracteres no permitidos
 const onlyNumbers = (event: KeyboardEvent) => {
   const char = String.fromCharCode(event.which)
   if (!/[0-9]/.test(char)) {
@@ -506,14 +475,12 @@ const onlyNumbers = (event: KeyboardEvent) => {
 
 const onlyLetters = (event: KeyboardEvent) => {
   const char = String.fromCharCode(event.which)
-  // Permitir letras, espacios, backspace, delete, etc.
   if (!/[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s\-']/.test(char) && !['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight'].includes(event.key)) {
     event.preventDefault()
   }
 }
 
 const submitForm = async () => {
-  // Validar todos los campos
   if (!validateAll()) {
     notifications.error('Por favor corrige los errores en el formulario')
     return
@@ -522,15 +489,12 @@ const submitForm = async () => {
   loading.value = true
 
   try {
-    // Preparar datos del formulario
-    // Verificar que fieldsState esté disponible
     if (!fieldsState.value) {
       throw new Error('El estado del formulario no está disponible')
     }
     
     const fields = fieldsState.value
     
-    // Validar que los campos requeridos existan
     if (!fields.idType || !fields.idNumber || !fields.firstName || 
         !fields.firstSurname || !fields.homeCity || !fields.email || !fields.mobileNumber) {
       console.error('Campos faltantes en fieldsState:', fields)
@@ -553,13 +517,10 @@ const submitForm = async () => {
     
     notifications.success('Usuario registrado exitosamente')
     
-    // Limpiar formulario después de registro exitoso
     reset()
     
-    // Restaurar el prefijo +57 en el campo de teléfono después del reset
     fieldsState.value.mobileNumber.value = '+57'
     
-    // Solo loggear en desarrollo
     if (import.meta.env.DEV) {
       console.log('Registro exitoso:', response.data)
     }

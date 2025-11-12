@@ -1,9 +1,8 @@
-<!-- AdminView.vue -->
 <template>
   <div class="container mt-5">
     <div class="card shadow-lg p-4 bg-light">
       <h1 class="card-title text-center text-danger mb-4">
-        🛡️ Panel de Administración (ACCESO RESTRINGIDO)
+        Panel de Administración (ACCESO RESTRINGIDO)
       </h1>
       <p class="lead text-center">
         ¡Bienvenido, {{ authStore.currentUser?.nickname || 'Administrador' }}!

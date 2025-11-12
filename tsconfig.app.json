@@ -4,14 +4,10 @@
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
     "types": ["vite/client"],
 
-    /* 💡 Configuración de Alias para TypeScript 💡 */
-    "baseUrl": ".", // La base para las rutas no relativas es la raíz del proyecto
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"] // Mapea "@/" a la carpeta "src/"
+      "@/*": ["./src/*"]
     },
-    /* ------------------------------------------- */
-
-    /* Linting */
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,

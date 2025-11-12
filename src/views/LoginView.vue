@@ -1,4 +1,3 @@
-<!-- src/components/auth/LoginForm.vue -->
 <script setup lang="ts">
 import { useAuth0 } from '@auth0/auth0-vue'
 
@@ -7,7 +6,7 @@ const { loginWithRedirect, isAuthenticated, user } = useAuth0()
 const handleLogin = async () => {
   try {
     await loginWithRedirect({
-      appState: { target: '/dashboard' } // o cualquier vista post-login
+      appState: { target: '/dashboard' }
     })
   } catch (error) {
     console.error('Error al iniciar sesión con Auth0:', error)

@@ -43,10 +43,10 @@ const getNotificationClass = (type: NotificationType): string => {
 
 const getNotificationTitle = (type: NotificationType): string => {
   const titleMap: Record<NotificationType, string> = {
-    success: '✓ ',
-    error: '✕ ',
-    warning: '⚠ ',
-    info: 'ℹ ',
+    success: '',
+    error: '',
+    warning: '',
+    info: '',
   }
   return titleMap[type] || ''
 }
@@ -73,7 +73,6 @@ const removeNotification = (id: string) => {
   min-width: 300px;
 }
 
-/* Transiciones */
 .notification-enter-active,
 .notification-leave-active {
   transition: all 0.3s ease;

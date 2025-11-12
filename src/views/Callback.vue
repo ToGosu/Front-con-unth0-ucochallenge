@@ -16,12 +16,10 @@ const authStore = useAuthStore()
 onMounted(async () => {
   try {
     const result = await handleRedirectCallback()
-    // obtener y guardar token en la store
     await authStore.fetchAndSetToken()
     const target = result?.appState?.target || '/dashboard'
     router.replace(target)
   } catch (err) {
-    // Si falla, limpiamos estado y redirigimos a la raíz
     authStore.clearAuth()
     router.replace('/')
   }

@@ -5,7 +5,6 @@ import { envConfig } from '../config/env'
 
 const ROLES_CLAIM_NAMESPACE = 'https://api-uco-challenge.com/roles'
 
-// Tipo para el usuario de Auth0 con claims personalizados
 interface Auth0User {
   sub?: string
   name?: string
@@ -16,14 +15,12 @@ interface Auth0User {
   [key: string]: unknown
 }
 
-// Tipo para opciones de login
 interface LoginOptions {
   appState?: {
     target?: string
   }
 }
 
-// Helper para detectar si estamos en desarrollo
 const isDevelopment = import.meta.env.DEV
 
 export const useAuthStore = defineStore('auth', () => {
@@ -56,12 +53,10 @@ export const useAuthStore = defineStore('auth', () => {
 
       accessToken.value = token
 
-      // Solo loggear en desarrollo
       if (isDevelopment) {
-        console.log('🔑 Token obtenido exitosamente')
+        console.log('Token obtenido exitosamente')
       }
 
-      // Extraer roles del usuario
       const authUser = user.value as Auth0User | undefined
       if (authUser) {
         const rolesClaim = authUser[ROLES_CLAIM_NAMESPACE]
@@ -71,31 +66,25 @@ export const useAuthStore = defineStore('auth', () => {
             ? [rolesClaim] 
             : []
 
-        // Si no hay roles, asignar rol por defecto (nunca 'admin')
         if (userRoles.value.length === 0) {
           userRoles.value = ['client']
         }
         
-        // Asegurar que nunca se asigne 'admin' por defecto
-        // Si el usuario tiene el rol 'admin', debe venir explícitamente de Auth0
         if (isDevelopment && userRoles.value.includes('admin')) {
-          console.log('⚠️ Usuario tiene rol admin - verificar que esté correctamente asignado en Auth0')
+          console.log('Usuario tiene rol admin - verificar que esté correctamente asignado en Auth0')
         }
 
         if (isDevelopment) {
-          console.log('👥 Roles asignados:', userRoles.value)
+          console.log('Roles asignados:', userRoles.value)
         }
       }
 
       return token
     } catch (err) {
-      // En producción, solo loggear errores críticos
       if (isDevelopment) {
-        console.error('❌ Error obteniendo token:', err)
+        console.error('Error obteniendo token:', err)
       }
       
-      // No limpiar auth automáticamente aquí, dejar que el interceptor lo maneje
-      // para evitar loops infinitos
       return null
     }
   }

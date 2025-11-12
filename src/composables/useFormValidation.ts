@@ -12,15 +12,12 @@ export interface FieldValidation {
   error: string | null
 }
 
-/**
- * Composable para validación de formularios
- */
 export function useFormValidation<T extends Record<string, FieldValidation>>(
   fields: T
 ) {
   const fieldsState = ref(fields)
   const isValid = computed(() => {
-    return Object.values(fieldsState.value).every(
+    return (Object.values(fieldsState.value) as FieldValidation[]).every(
       (field) => !field.error && field.touched
     )
   })
@@ -68,9 +65,6 @@ export function useFormValidation<T extends Record<string, FieldValidation>>(
   }
 }
 
-/**
- * Reglas de validación comunes
- */
 export const validationRules = {
   required: (message = 'Este campo es requerido'): ValidationRule => ({
     validator: (value) => value.trim().length > 0,
@@ -79,7 +73,7 @@ export const validationRules = {
 
   email: (message = 'Email inválido'): ValidationRule => ({
     validator: (value) => {
-      if (!value.trim()) return true // Si está vacío, required se encargará
+      if (!value.trim()) return true
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
       return emailRegex.test(value)
     },
@@ -105,13 +99,10 @@ export const validationRules = {
   phone: (message = 'Teléfono inválido'): ValidationRule => ({
     validator: (value) => {
       if (!value.trim()) return true
-      // Acepta formato internacional con +57 (Colombia)
-      // Debe empezar con +57 y tener al menos 10 dígitos en total (57 + 8 dígitos mínimo)
       const phoneRegex = /^\+57\d{8,10}$/
       if (phoneRegex.test(value)) {
         return true
       }
-      // También acepta formato antiguo sin +57 para compatibilidad
       const oldFormatRegex = /^[\d\s\-\(\)]+$/
       return oldFormatRegex.test(value) && value.replace(/\D/g, '').length >= 7
     },
@@ -138,7 +129,6 @@ export const validationRules = {
   lettersOnly: (message = 'Solo se permiten letras y espacios'): ValidationRule => ({
     validator: (value) => {
       if (!value.trim()) return true
-      // Permite letras (incluyendo acentos y ñ) y espacios
       const lettersRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/
       return lettersRegex.test(value)
     },
@@ -148,7 +138,6 @@ export const validationRules = {
   lettersAndSpaces: (message = 'Solo se permiten letras y espacios'): ValidationRule => ({
     validator: (value) => {
       if (!value.trim()) return true
-      // Permite letras (incluyendo acentos y ñ), espacios, guiones y apóstrofes
       const lettersRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s\-']+$/
       return lettersRegex.test(value)
     },
